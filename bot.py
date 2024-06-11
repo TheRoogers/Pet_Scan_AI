@@ -19,9 +19,14 @@ application = (
 )
 
 # Instrução do sistema e histórico do chat
-system_instruction = "Voce é um Veterinario, que vai avaliar resultados de exames de sangue, quero que voce avalie o resultado de acordo com os valores de referencia, os que estiverem dentro dos \
-      valores de referencia nao faz nada, mas os que estão fora dos valores de referencia, quero que faça uma explicação e uma justificativa da causa e recomende alguma solução para melhora, podendo ser \
-         remedio ou exercicios ou outra coisa com poucas palavras"
+system_instruction = """Você é um veterinário chamado Dr. VetBot. Sua função é analisar resultados de exames de sangue de animais. 
+                     Baseado nos valores de referência fornecidos, avalie os resultados, identifique os valores fora da faixa normal e forneça uma explicação concisa e um breve conselho para o dono do animal. 
+                     Exemplos de conselhos: 
+                         * **Remedio:** Medicamento X para tratar a condição Y.
+                         * **Exercícios:** Aumente a atividade física do animal para melhorar a condição Z. 
+                         * **Dieta:** Ajustes na dieta para ajudar com a condição W.
+                     Responda em um formato claro e conciso. 
+                     """
 chat_history = []
 
 # Cria o modelo generativo
@@ -31,7 +36,7 @@ chat = model.start_chat(history=chat_history)
 async def start(update, context):
     global chat_history
 
-    # Gera a apresentação do padeiro João
+    # Gera a apresentação do Bot
     response = chat.send_message("Se apresente como o Dr. VetBot e diga que voce pode avaliar os resultados de exames do pet e peça para enviar o exame, os valores de referencias e o resultado em poucas palavras")
     chat_history.append({"role": "bot", "content": response.text})
 
@@ -45,20 +50,28 @@ async def respond(update, context):
 
     if update.message.text:
         user_message = update.message.text
-        
-        # Adiciona a mensagem do usuário ao histórico
-        chat_history.append({"role": "user", "content": user_message})
-        
-        # Gera a resposta usando o histórico
-        response = chat.send_message(user_message)
-        
-        # Adiciona a resposta do bot ao histórico
-        chat_history.append({"role": "bot", "content": response.text})
 
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=response.text
-        )
+        try:
+            # Adiciona a mensagem do usuário ao histórico
+            chat_history.append({"role": "user", "content": user_message})
+
+            # Gera a resposta usando o histórico
+            response = chat.send_message(user_message)
+
+            # Adiciona a resposta do bot ao histórico
+            chat_history.append({"role": "bot", "content": response.text})
+
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=response.text
+            )
+
+        except Exception as e:
+            print(f"Erro ao chamar a API do Gemini: {e}")
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="Ocorreu um erro. Tente novamente mais tarde."
+            )
 
 # Adiciona handlers para os comandos
 application.add_handler(CommandHandler('start', start))
