@@ -2,6 +2,9 @@
 
 Este projeto demonstra um bot do Telegram que utiliza a API do Google Generative AI (Gemini) para fornecer informações sobre exames de sangue de animais de estimação.
 
+
+![Chat 1](image/1.png) ![Chat 2](image/2.png) ![Chat 3](image/3.png)
+
 ### Funcionamento
 
 O bot funciona da seguinte maneira:
